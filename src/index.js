@@ -11,7 +11,7 @@ var refreshClickStream = Observable.fromEvent(refreshButton, 'click');
 
 var requestStream = refreshClickStream
   .startWith('initial click')
-  .map(function() {
+  .map(() => {
     var offset = Math.floor(Math.random()*500);
     return 'https://api.github.com/users?since=' + offset;
   });
@@ -41,12 +41,10 @@ function combineWithResponse(stream) {
   return stream
     .startWith('fake click')
     .combineLatest(responseStream,
-      function(click, listUsers) {
-        return _.first(_.shuffle(listUsers));
-      }
+      (click, listUsers) => _.first(_.shuffle(listUsers))
     )
     .merge(
-      refreshClickStream.map(function(){return null;})
+      refreshClickStream.map(() => null)
     )
     .startWith(null);
 }
@@ -85,15 +83,15 @@ function clearSuggestion(selector) {
   $(selector).css('visibility', 'hidden');;
 }
 
-suggestion1Stream.subscribe(function(suggestion) {
+suggestion1Stream.subscribe((suggestion) => {
   updateSuggestion('.suggestion1', suggestion)
 })
 
-suggestion2Stream.subscribe(function(suggestion) {
+suggestion2Stream.subscribe((suggestion) => {
   updateSuggestion('.suggestion2', suggestion)
 })
 
-suggestion3Stream.subscribe(function(suggestion) {
+suggestion3Stream.subscribe((suggestion) => {
   updateSuggestion('.suggestion3', suggestion)
 })
 
