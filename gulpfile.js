@@ -14,7 +14,8 @@ var gulp = require('gulp'),
   notify = require('gulp-notify'),
   browserSync = require('browser-sync'),
   reload = browserSync.reload,
-  pkg = require('./package.json');
+  pkg = require('./package.json'),
+  to5ify = require("6to5ify");
 
 var files = {
   index: './src/index.html',
@@ -37,7 +38,9 @@ gulp.task('copy-index', function () {
 
 gulp.task('browserify', function () {
   browserify(files.js)
+    .transform(to5ify)
     .transform(reactify)
+    
     .bundle()
     .pipe(source(files.bundle))
     .pipe(buffer())
@@ -56,7 +59,9 @@ gulp.task('watchify', function () {
       .pipe(reload({stream: true}));
   }
 
-  bundler.transform(reactify)
+  bundler
+    .transform(to5ify)
+    .transform(reactify)
     .on('update', rebundle);
   return rebundle();
 });

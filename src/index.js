@@ -1,7 +1,7 @@
 var creds = require('./creds')
 var _ = window._ = require('lodash');
 var $ = window.jQuery = require('jquery');
-var Rx = window.Rx = require('rx/dist/rx.all');
+var Rx = window.Rx = require('rx');
 var Observable = Rx.Observable;
 
 var results = $('.results');
@@ -30,15 +30,15 @@ var responseStream = requestStream
           url: requestUrl,
           dataType: 'json',
           async: true,
-          beforeSend: function (xhr){ 
+          beforeSend: (xhr) => { 
               xhr.setRequestHeader('Authorization', make_base_auth(creds.username, creds.password)); 
           }
       }).promise()
     )
   })
 
-function mapToResponse(closeClickStream) {
-  return closeClickStream
+function combineWithResponse(stream) {
+  return stream
     .startWith('fake click')
     .combineLatest(responseStream,
       function(click, listUsers) {
@@ -59,9 +59,9 @@ var close1ClickStream = Observable.fromEvent(close1Button, 'click');
 var close2ClickStream = Observable.fromEvent(close2Button, 'click');
 var close3ClickStream = Observable.fromEvent(close3Button, 'click');
 
-var suggestion1Stream = mapToResponse(close1ClickStream);
-var suggestion2Stream = mapToResponse(close2ClickStream);
-var suggestion3Stream = mapToResponse(close3ClickStream);
+var suggestion1Stream = combineWithResponse(close1ClickStream);
+var suggestion2Stream = combineWithResponse(close2ClickStream);
+var suggestion3Stream = combineWithResponse(close3ClickStream);
 
 function updateSuggestion(selector, suggestion) {
   var suggestionEl = $(selector),
@@ -70,6 +70,9 @@ function updateSuggestion(selector, suggestion) {
 
   if(!suggestion) {
     suggestionEl.css('visibility', 'hidden');
+    avatarEl.attr('src', '');
+    usernameEl.text('');
+    usernameEl.attr('href', ''); 
   } else {
     suggestionEl.css('visibility', 'visible');
     avatarEl.attr('src',suggestion.avatar_url);
@@ -79,7 +82,7 @@ function updateSuggestion(selector, suggestion) {
 }
 
 function clearSuggestion(selector) {
-  $(selector).hide();
+  $(selector).css('visibility', 'hidden');;
 }
 
 suggestion1Stream.subscribe(function(suggestion) {
