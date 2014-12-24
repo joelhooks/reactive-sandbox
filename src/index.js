@@ -37,28 +37,49 @@ var responseStream = requestStream
     )
   })
 
-var suggestion1Stream = responseStream
-  .map(function(listUsers) {
-    return _.first(_.shuffle(listUsers));
-  })
+function mapToResponse(closeClickStream) {
+  return closeClickStream
+    .startWith('fake click')
+    .combineLatest(responseStream,
+      function(click, listUsers) {
+        return _.first(_.shuffle(listUsers));
+      }
+    )
+    .merge(
+      refreshClickStream.map(function(){return null;})
+    )
+    .startWith(null);
+}
 
-var suggestion2Stream = responseStream
-  .map(function(listUsers) {
-    return _.first(_.shuffle(listUsers));
-  })
+var close1Button = $('.close1');
+var close2Button = $('.close2');
+var close3Button = $('.close3');
 
-var suggestion3Stream = responseStream
-  .map(function(listUsers) {
-    return _.first(_.shuffle(listUsers));
-  })
+var close1ClickStream = Observable.fromEvent(close1Button, 'click');
+var close2ClickStream = Observable.fromEvent(close2Button, 'click');
+var close3ClickStream = Observable.fromEvent(close3Button, 'click');
+
+var suggestion1Stream = mapToResponse(close1ClickStream);
+var suggestion2Stream = mapToResponse(close2ClickStream);
+var suggestion3Stream = mapToResponse(close3ClickStream);
 
 function updateSuggestion(selector, suggestion) {
   var suggestionEl = $(selector),
    avatarEl = suggestionEl.find('img'),
    usernameEl = suggestionEl.find('.username');
-  avatarEl.attr('src',suggestion.avatar_url);
-  usernameEl.text(suggestion.login);
-  usernameEl.attr('href', suggestion.html_url);
+
+  if(!suggestion) {
+    suggestionEl.css('visibility', 'hidden');
+  } else {
+    suggestionEl.css('visibility', 'visible');
+    avatarEl.attr('src',suggestion.avatar_url);
+    usernameEl.text(suggestion.login);
+    usernameEl.attr('href', suggestion.html_url);   
+  }
+}
+
+function clearSuggestion(selector) {
+  $(selector).hide();
 }
 
 suggestion1Stream.subscribe(function(suggestion) {
