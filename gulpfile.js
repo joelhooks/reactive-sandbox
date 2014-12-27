@@ -48,7 +48,7 @@ gulp.task('browserify', function () {
 });
 
 gulp.task('watchify', function () {
-  var bundler = watchify(browserify(files.js, watchify.args));
+  var bundler = watchify(browserify([files.js], watchify.args));
 
   function rebundle() {
     return bundler
