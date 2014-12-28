@@ -6,7 +6,7 @@ var React           = require('react/addons'),
     NoteStore      = require('../stores/NoteStore');
 
 
-var MainView = function(NoteStore, Header) {
+var MainView = function(NoteStore, Header, NoteList) {
   return React.createClass({
   getInitialState: function() {
     return {};
@@ -35,6 +35,6 @@ var MainView = function(NoteStore, Header) {
 })
 }
 
-di.annotate(MainView, new di.Inject(NoteStore, Header));
+di.annotate(MainView, new di.Inject(NoteStore, Header, NoteList));
 
 module.exports = MainView;

@@ -1,19 +1,15 @@
 var React           = require('react/addons'),
     Rx              = require('rx'),
-    NoteView        = require('./NoteView.jsx');
+    NoteView        = require('./NoteView.jsx'),
+    di              = require('di');
 
-var NoteList = React.createClass({
-
-  componentWillMount: function() {
-    console.log(this.props.notes)
-  },
+var NoteList = function(NoteView) {
+  return React.createClass({
 
   render: function() {
     var noteItems = this.props.notes.map(function (note) {
             return (
-                <NoteView
-                    note={note}
-                />
+                <NoteView key={note.title} note={note} />
             );
         }, this);
 
@@ -27,5 +23,6 @@ var NoteList = React.createClass({
     )
   }
 })
-
+}
+di.annotate(NoteList, new di.Inject(NoteView));
 module.exports = NoteList;
