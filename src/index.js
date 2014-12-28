@@ -1,16 +1,14 @@
-var Rx              = require('rx'),
-    React           = require('react/addons'),
-    MainView        = require('./views/MainView.jsx'),
-    Actions         = require('./actions/Actions'),
-    NoteStore       = require('./stores/NoteStore');
+var React           = require('react/addons'),
+    Router          = require('./app/router'),
+    di              = require('di');
 
-var store = new NoteStore('test');
-Actions.register(store.updates);
+var injector = new di.Injector([]);
 
-React.renderComponent(
-    MainView({ notes: store.notes }),
-    document.getElementById('app')
-); 
+var router = injector.get(Router);
+
+router.run((Handler) => {
+  React.render(<Handler />, document.body);
+});
 
 
 

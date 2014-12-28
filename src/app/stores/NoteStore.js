@@ -2,8 +2,8 @@ var Rx = require('rx'),
     localStore = require('../utils/store')
 
 class NoteStore { 
-  constructor(key) {
-
+  constructor() {
+    var key = 'notes'
     this.updates = new Rx.BehaviorSubject(localStore(key))
 
     this.notes = this.updates.scan((notes, operation) => {

@@ -1,17 +1,12 @@
-/**
- * @jsx React.DOM
- */
-
-/*jshint node:true*/
-'use strict';
-
 var React           = require('react/addons'),
     Actions         = require('../actions/Actions'),
-    EventHandler    = require('../utils/eventHandler');
+    EventHandler    = require('../utils/eventHandler'),
+    di              = require('di');
 
 var ENTER_KEY = 13;
 
-var Header = React.createClass({
+var Header = function(Actions) {
+    return React.createClass({
     componentWillMount: function () {
         var newFieldKeyDown = EventHandler.create();
         var enterEvent = newFieldKeyDown.filter(event => event.keyCode === ENTER_KEY)
@@ -54,5 +49,8 @@ var Header = React.createClass({
         );
     }
 });
+}
+
+di.annotate(Header, new di.Inject(Actions));
 
 module.exports = Header;

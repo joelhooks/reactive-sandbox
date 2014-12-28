@@ -1,12 +1,13 @@
-var Rx = require('rx');
+var Rx = require('rx'),
+    di = require('di'),
+    NoteStore = require('../stores/NoteStore');
 
 class Actions {
-  register(updates) {
-    this.updates = updates;
+  constructor(NoteStore) {
+    this.updates = NoteStore.updates;
     this.create = new Rx.Subject();
     this.init();
   }
-
   init() {
     this.create
       .map(function (title) {
@@ -20,4 +21,6 @@ class Actions {
   }
 }
 
-module.exports = new Actions();
+di.annotate(Actions, new di.Inject(NoteStore));
+
+module.exports = Actions;

@@ -5,6 +5,7 @@ var React           = require('react/addons'),
 var NoteList = React.createClass({
 
   componentWillMount: function() {
+    console.log(this.props.notes)
   },
 
   render: function() {
