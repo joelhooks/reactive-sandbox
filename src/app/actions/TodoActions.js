@@ -7,9 +7,12 @@ var Rx              = require('rx'),
 class TodoActions {
   constructor(TodoStore) {
     this.updates = TodoStore.updates;
+    
     this.create = new Rx.Subject();
     this.toggle = new Rx.Subject();
     this.update = new Rx.Subject();
+    this.destroy = new Rx.Subject();
+    
     this.init();
   }
   init() {
@@ -37,13 +40,17 @@ class TodoActions {
 
     this.update
       .map((updateItem) => {
-        return (todoList) => {
-          return todoList.map((todo) => {
-            return (todo !== updateItem.todo) ? todo : _.assign({}, todo, {title: updateItem.text});
-          })
-        }
+        return (todoList) => todoList.map((todo) => {
+          return (todo !== updateItem.todo) ? todo : _.assign({}, todo, {title: updateItem.text});
+        })
+
       })
       .subscribe(this.updates);
+
+    this.destroy
+      .map((todoToDestroy) => {
+        return (todoList) => todoList.filter((todo) => todo !== todoToDestroy)
+      })
   }
 }
 

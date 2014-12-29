@@ -3,7 +3,7 @@ var React               = require('react/addons'),
     Rx                  = require('rx'),
     di                  = require('di'),
     TodoActions         = require('../actions/TodoActions'),
-    {EventHandler}      = require('rx-react'),
+    EventHandler        = require('../utils/EventHandler'),
     {LifecycleMixin}    = require('rx-react');
 
 var ESCAPE_KEY = 27;
@@ -86,17 +86,17 @@ var TodoItem = function(TodoActions, EventHandler) {
   },
 
   saveTodo: function() {
-    var newTitle = this.state.editValue.trim();
-    if (newTitle) {
+    var val = this.state.editValue.trim();
+    if (val) {
       TodoActions.update.onNext({
-        text: newTitle,
+        text: val,
         todo: this.getTodo()
       });
       this.setState({
-        editValue: newTitle, 
+        editValue: val, 
         isEditing: false
       });
-    } else { //it's empty!
+    } else { //it's
       TodoActions.destroy.onNext(this.getTodo());
     }
   },
