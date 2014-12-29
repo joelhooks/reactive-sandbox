@@ -42,6 +42,7 @@
     "reflux": "^0.2.0",
     "rx": "^2.3.21",
     "rx-jquery": "^1.1.7",
+    "rx-react": "^0.1.0",
     "todomvc-common": "^0.3.1",
     "zepto": "0.0.4"
   }
