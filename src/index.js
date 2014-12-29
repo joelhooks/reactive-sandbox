@@ -6,8 +6,10 @@ var injector = new di.Injector([]);
 
 var router = injector.get(Router);
 
-router.run((Handler) => {
-  React.render(<Handler />, document.body);
+
+
+router.run((Handler, state) => {
+  React.render(<Handler state={state} />, document.getElementById('todoapp'));
 });
 
 

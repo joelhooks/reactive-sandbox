@@ -1,20 +1,5 @@
 var Rx = require('rx');
 
-exports.create = function () {
-    var subject = function() {
-        subject.onNext.apply(subject, arguments);
-    };
-    
-    getEnumerablePropertyNames(Rx.Subject.prototype)
-    .forEach(function (property) {
-        subject[property] = Rx.Subject.prototype[property];
-    });
-    Rx.Subject.call(subject);
-    
-    return subject;
-};
-
-
 function getEnumerablePropertyNames(target) {
     var result = [];
     for (var key in target) {
@@ -22,4 +7,28 @@ function getEnumerablePropertyNames(target) {
     }
     return result;
 }
+
+/**
+    creates an event handler that is an Rx subject
+*/
+class EventHandler {
+    create() {
+        var subject = function() {
+            subject.onNext.apply(subject, arguments);
+        };
+        
+        getEnumerablePropertyNames(Rx.Subject.prototype)
+            .forEach(function (property) {
+                subject[property] = Rx.Subject.prototype[property];
+            });
+        Rx.Subject.call(subject);
+        
+        return subject;    
+    }
+}
+
+module.exports = EventHandler;
+
+
+
 

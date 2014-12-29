@@ -1,15 +1,17 @@
 var React           = require('react/addons'),
-    Actions         = require('../actions/Actions'),
-    EventHandler    = require('../utils/eventHandler'),
+    TodoActions     = require('../actions/TodoActions'),
+    EventHandler    = require('../utils/EventHandler'),
     di              = require('di');
 
 var ENTER_KEY = 13;
 
-var Header = function(Actions) {
+var Header = function(TodoActions, EventHandler) {
     return React.createClass({
     componentWillMount: function () {
         var newFieldKeyDown = EventHandler.create();
         var enterEvent = newFieldKeyDown.filter(event => event.keyCode === ENTER_KEY)
+
+        console.log(newFieldKeyDown)
         
         enterEvent.forEach(function (event) {
             event.stopPropagation();
@@ -22,7 +24,7 @@ var Header = function(Actions) {
             })
             .filter(function (value) {
                 return !!value;
-            }).subscribe(Actions.create);
+            }).subscribe(TodoActions.create);
 
         enterEvent
             .forEach(function (event) {
@@ -38,9 +40,9 @@ var Header = function(Actions) {
     render: function () {
         return (
             <header id="header">
-                <h1>Notes</h1>
+                <h1>Todos</h1>
                 <input
-                    id="new-note"
+                    id="new-todo"
                     placeholder="What needs to be remembered?"
                     autoFocus={true}
                     onKeyDown={this.handlers.newFieldKeyDown}
@@ -51,6 +53,6 @@ var Header = function(Actions) {
 });
 }
 
-di.annotate(Header, new di.Inject(Actions));
+di.annotate(Header, new di.Inject(TodoActions, EventHandler));
 
 module.exports = Header;

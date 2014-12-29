@@ -1,4 +1,4 @@
-var Routes = require('./routes'),
+var Routes          = require('./routes'),
     ReactRouter     = require('react-router'),
     di              = require('di');
     

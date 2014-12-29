@@ -1,40 +1,62 @@
 var React           = require('react/addons'),
     Rx              = require('rx'),
+    {RouteHandler}  = require('react-router'),
+    {State}         = require('react-router'),
     di              = require('di'),
-    NoteList        = require('./NoteList.jsx'),
-    Header          = require('./header.jsx'),
-    NoteStore      = require('../stores/NoteStore');
+    TodoList        = require('./TodoList.jsx'),
+    Header          = require('./Header.jsx'),
+    Footer          = require('./Footer.jsx'),
+    TodoStore       = require('../stores/TodoStore'),
+    _               = require('lodash');
 
-
-var MainView = function(NoteStore, Header, NoteList) {
+var MainView = function(Header, Footer, TodoList, TodoStore) {
   return React.createClass({
+  mixins: [ State ],
   getInitialState: function() {
     return {};
   },
-
   componentWillMount: function() {
-    var notes = NoteStore.notes;
-    notes
-      .map((notes) => {
+    
+    
+    // we are only accessing the store up top and delivering
+    // it to sub-components as properties.
+    var todoList = TodoStore.todoList
+      .map((todoList) => {
+        console.log("ASSEMBLE")
         return {
-          notes: notes
+          todoList: todoList
         }
       })
-      .subscribe(this.setState.bind(this))
-  },
+      
+      todoList.subscribe(this.setState.bind(this))
 
+  },
   render: function() {
+    var showing = this.getRoutes()[1].name,
+        todoList = this.state.todoList,
+        filteredList;
+        
+    switch(showing){
+        case 'Complete':
+            filteredList = _.filter(todoList, (item) => item.isComplete);
+            break;
+        case 'Active':
+            filteredList = _.filter(todoList, (item) => !item.isComplete);
+            break;
+        default:
+            filteredList = todoList;
+    }
     return (
       <div>
-      <h1>This is just a test.</h1>
-      <Header />
-      <NoteList notes={this.state.notes}/>
+        <Header/>
+        <RouteHandler todoList={filteredList} />
+        <Footer todoList={todoList}/>
       </div>
     )
   }
 })
 }
 
-di.annotate(MainView, new di.Inject(NoteStore, Header, NoteList));
+di.annotate(MainView, new di.Inject(Header, Footer, TodoList, TodoStore));
 
 module.exports = MainView;
