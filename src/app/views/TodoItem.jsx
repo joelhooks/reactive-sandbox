@@ -9,115 +9,101 @@ var ENTER_KEY = 13;
 
 var TodoItem = function(TodoActions, EventHandler) {
   return React.createClass({
+  
   propTypes: {
-          title: React.PropTypes.string.isRequired,
-          isComplete: React.PropTypes.bool.isRequired,
-          key: React.PropTypes.number
-      },
+    todo: React.PropTypes.object.isRequired,
+    key: React.PropTypes.number
+  },
+
   getInitialState: function() {
     return {};
   },
+
   mixins: [React.addons.LinkedStateMixin], 
+
+  getTodo: function() {
+    return this.props.todo;
+  },
+
+  saveTodo: function() {
+    var val = this.state.editValue.trim();
+    if (val) {
+        TodoActions.update.onNext({
+            text: val,
+            todo: this.getTodo()
+        });
+        this.setState({
+            editValue: val, 
+            isEditing: false
+        });
+    } else {
+        TodoActions.destroy.onNext(this.getTodo());
+    }
+  },
+
   componentWillMount: function() {
     var handleToggle    = EventHandler.create(),
         handleEditStart = EventHandler.create(),
         handleDestroy   = EventHandler.create(),
         handleBlur      = EventHandler.create(),
-        handleValueChange = EventHandler.create();
+        editFieldKeyUp = EventHandler.create();
 
     handleToggle
-      .map( (event) => {
-        return {
-          title: this.props.title,
-          isComplete: !this.props.isComplete
-        };
-      })
-      .filter(function (value) {
-        return !!value;
-      }).subscribe(TodoActions.toggle)
+      .map(this.getTodo)
+      .subscribe(TodoActions.toggle)
 
     handleBlur
-      .map((event) => {
-          return event.target.value.trim();
-      })
-      .filter( (value) => {
-          return !!value && this.state.isEditing;
-      })
-      .map((newTitle) => {
-        console.log(newTitle, this.props.title)
+      .subscribe(this.saveTodo)
+
+    editFieldKeyUp
+      .filter((event) => event.keyCode === ESCAPE_KEY)
+      .map(() => {
         return {
-          newTitle: newTitle,
-          title: this.props.title
+          isEditing: false,
+          editValue: this.getTodo().title
         }
       })
-      .subscribe(TodoActions.update)
-
-
-    // handleValueChange
-    //     .filter(function (event) {
-    //         return event.keyCode === ESCAPE_KEY;
-    //     })
-    //     .map(function () {
-    //         return {
-    //             editing: false,
-    //             editText: this.props.title
-    //         };
-    //     }.bind(this))
-    //     .subscribe(setState);
+      .subscribe(this.setState.bind(this));
     
-    // handleValueChange
-    //     .filter(function (event) {
-    //         return event.keyCode === ENTER_KEY;
-    //     })
-    //     .subscribe(this.submit);
+    editFieldKeyUp
+      .filter((event) => event.keyCode === ENTER_KEY)
+      .subscribe(this.saveTodo);
 
-    handleValueChange.forEach((event) => {
-      var text = this.state.editValue; // because of the linkState call in render, this is the contents of the field
-      // we pressed enter, if text isn't empty we blur the field which will cause a save
-      if (event.which === ENTER_KEY && text) {
-          this.refs.editInput.getDOMNode().blur();
-      }
-      // pressed escape. set editing to false before blurring so we won't save
-      else if (event.which === ESCAPE_KEY) {
-          this.setState({ isEditing: false },function(){
-              this.refs.editInput.getDOMNode().blur();
-          });
-      }
-    })
-
-    handleEditStart.forEach((event) => {
-      event.preventDefault();
-      // because of linkState call in render, field will get value from this.state.editValue
-      this.setState({
-          isEditing: true,
-          editValue: this.props.title
-      }, function() {
+    handleEditStart
+      .map((event) => { 
+        return {
+            isEditing: true,
+            editValue: this.getTodo().title
+        };
+      })
+      .subscribe((stateUpdate) => {
+        this.setState(stateUpdate, () => {
           this.refs.editInput.getDOMNode().focus();
+        })
       });
-    })
 
     this.handlers = {
       handleEditStart: handleEditStart,
       handleDestroy: handleDestroy,
       handleBlur: handleBlur,
-      handleValueChange: handleValueChange,
+      editFieldKeyUp: editFieldKeyUp,
       handleToggle: handleToggle
     };
   },
 
   render: function() {
     var classes = React.addons.classSet({
-                    'completed': this.props.isComplete,
-                    'editing': this.state.isEditing
-                  });
+      'completed': this.props.todo.isComplete,
+      'editing': this.state.isEditing
+    });
     return (
       <li className={classes}>
-          <div className="view">
-              <input className="toggle" type="checkbox" checked={!!this.props.isComplete} onChange={this.handlers.handleToggle} />
-              <label onDoubleClick={this.handlers.handleEditStart}>{this.props.title}</label>
-              <button className="destroy" onClick={this.handlers.handleDestroy}></button>
-          </div>
-          <input ref="editInput" className="edit" valueLink={this.linkState('editValue')} onKeyUp={this.handlers.handleValueChange} onBlur={this.handlers.handleBlur} />
+        <div className="view">
+          <input className="toggle" type="checkbox" checked={!!this.props.todo.isComplete} onChange={this.handlers.handleToggle} />
+          <label onDoubleClick={this.handlers.handleEditStart}>{this.props.todo.title}</label>
+          <button className="destroy" onClick={this.handlers.handleDestroy}></button>
+        </div>
+        <input ref="editInput" className="edit" valueLink={this.linkState('editValue')} onKeyUp={this.handlers.editFieldKeyUp} onBlur={this.handlers.handleBlur} />
       </li>
     )
   }

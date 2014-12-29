@@ -8,9 +8,9 @@ var TodoList = function(TodoItem) {
   render: function() {
     console.log(this.props)
     var todoList = this.props.todoList,
-        todoItems = todoList.map((note) => {
+        todoItems = todoList.map((todo) => {
             return (
-                <TodoItem key={note.title} title={note.title} isComplete={note.isComplete} />
+                <TodoItem key={todo.id} todo={todo} />
             );
         }),
         classes = React.addons.classSet({

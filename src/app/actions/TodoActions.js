@@ -1,7 +1,8 @@
-var Rx = require('rx'),
-    di = require('di'),
-    TodoStore = require('../stores/TodoStore'),
-    _ = require('lodash');
+var Rx              = require('rx'),
+    di              = require('di'),
+    TodoStore       = require('../stores/TodoStore'),
+    _               = require('lodash'),
+    uuid            = require('node-uuid');
 
 class TodoActions {
   constructor(TodoStore) {
@@ -17,17 +18,18 @@ class TodoActions {
         return (todoList) => { // the operation to be performed
           return todoList.concat({ // the resulting array (adds a new object)
             title: title,
-            isComplete: false
+            isComplete: false,
+            id: uuid.v1()
           });
         };
       })
       .subscribe(this.updates);
 
     this.toggle
-      .map((update) => {
+      .map((updateTodo) => {
         return (todoList) => {
           return todoList.map((todo) => {
-            return (todo.title !== update.title) ? todo : _.assign({}, todo, {isComplete: update.isComplete});
+            return (todo !== updateTodo) ? todo : _.assign({}, todo, {isComplete: !todo.isComplete});
           });
         }
       })
@@ -35,12 +37,10 @@ class TodoActions {
 
     this.update
       .map((updateItem) => {
-        console.log('update', updateItem)
         return (todoList) => {
-          console.log(todoList)
-          var note = _.find(todoList, (note) => updateItem.title === note.title)
-          if(note) note.title = updateItem.newTitle;
-          return todoList;
+          return todoList.map((todo) => {
+            return (todo !== updateItem.todo) ? todo : _.assign({}, todo, {title: updateItem.text});
+          })
         }
       })
       .subscribe(this.updates);
